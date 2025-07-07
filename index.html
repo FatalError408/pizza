@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Pizza Place</title>
+    <!-- Font Awesome icons (fixed) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <!-- Fallback JS loader for Font Awesome -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="game-container">
+        <img src="/pizzacashierplace.png" id="background-img" alt="Pizza place interior" draggable="false">
+        <img id="customer-img" alt="Customer" draggable="false">
+        <img src="/tableorder.png" id="table-img" alt="Counter top" draggable="false">
+
+        <div id="chat-container-wrapper" class="visible">
+            <div id="chat-container">
+                <div id="chat-log">
+                    <div class="message system">A new customer is approaching the counter...</div>
+                </div>
+                <div id="input-container">
+                    <input type="text" id="user-input" placeholder="Say 'Hello' to the customer..." disabled>
+                    <button id="send-btn" disabled><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-board">
+            <div id="menu-title"><i class="fas fa-utensils"></i> Our Menu <i class="fas fa-utensils"></i></div>
+            <div id="menu-content">
+                <!-- Dynamic menu inserted here -->
+            </div>
+            <button id="edit-menu-btn"><i class="fas fa-edit"></i> Edit Menu</button>
+            <button id="furniture-btn"><i class="fas fa-couch"></i> Furniture</button>
+        </div>
+
+        <!-- Add toggle buttons side by side at top left -->
+        <div id="topleft-panel">
+            <button id="menu-toggle-btn"><i class="fas fa-book-open"></i> Menu</button>
+            <button id="customer-maker-toggle-btn"><i class="fas fa-user-cog"></i> Customer Maker</button>
+        </div>
+
+        <!-- Customer Maker UI Overlay -->
+        <div id="customer-maker-overlay" style="display:none;">
+            <div id="customer-maker-modal">
+                <div id="customer-maker-title">
+                    <i class="fas fa-user-cog"></i> Customer Types
+                    <button id="close-customer-maker"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="customer-maker-content">
+                    <form id="customer-maker-form">
+                        <div id="customer-types-container"></div>
+                        <button type="button" id="add-customer-type-btn"><i class="fas fa-plus"></i> Add Customer</button>
+                        <div style="text-align:right; margin-top:15px;">
+                            <button type="submit" id="save-customers-btn" class="success-btn"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="menu-editor-overlay" style="display:none;">
+            <div id="menu-editor-modal">
+                <div id="menu-editor-title">
+                    <i class="fas fa-utensils"></i> Edit Menu
+                    <button id="close-menu-editor"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="menu-editor-content">
+                    <form id="menu-form">
+                        <div id="editor-categories-container"></div>
+                        <button type="button" id="add-category-btn"><i class="fas fa-plus"></i> Add Category</button>
+                        <div style="text-align:right; margin-top:15px;">
+                            <button type="submit" id="save-menu-btn" class="success-btn"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading-overlay">
+            <div class="spinner"></div>
+            <p id="loading-text">Generating customer...</p>
+        </div>
+
+        <div id="kick-btn-wrapper" class="visible">
+            <button id="kick-btn">Kick <i class="fas fa-user-slash"></i></button>
+        </div>
+
+        <!-- Container for placed furniture images -->
+        <div id="placed-furniture-container"></div>
+
+        <!-- FURNITURE MODE UI -->
+        <div id="furniture-panel" style="display: none;">
+            <div id="furniture-panel-header">
+                <h3><i class="fas fa-couch"></i> Choose Furniture</h3>
+                <button id="close-furniture-mode-btn"><i class="fas fa-times"></i> Close</button>
+            </div>
+            <div id="furniture-options">
+                <!-- Furniture items will be injected here -->
+            </div>
+            <div id="furniture-limit-text">
+                Placed: <span id="placed-count">0</span> / <span id="max-count">3</span>
+            </div>
+        </div>
+        <div id="furniture-stats-panel" style="display: none;">
+            <h4><i class="fas fa-chart-bar"></i> Restaurant Ambiance</h4>
+            <div id="furniture-stats-content">
+                <!-- Stats will be injected here -->
+            </div>
+            <div id="ambiance-description-container">
+                <h5>Customer's Perspective:</h5>
+                <p id="ambiance-description-text">Place some furniture to see what the customers think!</p>
+            </div>
+             <button id="reset-furniture-btn"><i class="fas fa-trash-alt"></i> Reset All</button>
+        </div>
+        <!-- END FURNITURE MODE UI -->
+
+        <!-- FURNITURE CREATOR MODAL -->
+        <div id="furniture-creator-overlay" style="display:none;">
+            <div id="furniture-creator-modal">
+                <div id="furniture-creator-title">
+                    <i class="fas fa-plus-square"></i> Create New Furniture
+                    <button id="close-furniture-creator"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="furniture-creator-content">
+                    <form id="furniture-creator-form">
+                        <div class="form-row">
+                            <label for="furniture-name">Name</label>
+                            <input type="text" id="furniture-name" placeholder="e.g., Cool Couch" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="furniture-desc">Description</label>
+                            <textarea id="furniture-desc" placeholder="A cool couch that is very comfy." rows="2" required></textarea>
+                        </div>
+
+                        <div class="form-row image-source-row">
+                             <label>Image Source:</label>
+                             <label><input type="radio" name="image-source" value="prompt" checked> AI Prompt</label>
+                             <label><input type="radio" name="image-source" value="upload"> Upload Image</label>
+                        </div>
+                        <div id="image-prompt-group" class="form-row">
+                            <label for="furniture-prompt">AI Image Prompt</label>
+                            <textarea id="furniture-prompt" placeholder="A photorealistic cool couch, transparent background..." rows="2"></textarea>
+                        </div>
+                        <div id="image-upload-group" class="form-row" style="display: none;">
+                            <label for="furniture-upload">Upload 1:1 Image</label>
+                            <input type="file" id="furniture-upload" accept="image/*">
+                            <img id="furniture-image-preview" src="" alt="Image Preview"/>
+                        </div>
+                        
+                        <div class="form-row">
+                            <label>Ambiance Stats</label>
+                            <div id="furniture-stats-editor">
+                                <!-- Stats inputs will be generated here -->
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="save-furniture-btn" class="success-btn"><i class="fas fa-save"></i> Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- END FURNITURE CREATOR UI -->
+
+        <!-- SETTINGS BUTTON + MODAL -->
+        <div id="settings-container">
+            <button id="settings-btn" title="Settings"><i class="fas fa-cog"></i></button>
+            <div id="settings-modal" style="display:none;">
+                <div id="settings-modal-content">
+                    <div id="settings-title">
+                        <i class="fas fa-sliders-h"></i> Settings
+                        <button id="settings-close-btn"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="settings-section">
+                        <label>
+                            <input type="checkbox" id="setting-customer-leave" checked>
+                            <span>Allow customers to leave (happy/angry)</span>
+                        </label>
+                        <div class="settings-desc">
+                            If off, customers will never leave on their own; only you can kick them.
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <label>
+                            <input type="checkbox" id="setting-debug-log" checked>
+                            <span>Show AI Debug Log</span>
+                        </label>
+                        <div class="settings-desc">
+                           Shows the raw JSON responses from background AI checks.
+                        </div>
+                        <div id="ai-debug-log-container">
+                            <!-- Log entries will be added here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END SETTINGS UI -->
+    </div>
+
+    <div id="review-board-wrapper" class="visible">
+        <div id="review-board">
+            <div id="review-title"><i class="fas fa-star"></i> Customer Reviews <i class="fas fa-star"></i></div>
+            <div id="reviews-list">
+                <!-- Reviews will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <audio id="bg-music" src="/Music.mp3" loop></audio>
+    <audio id="sfx-register" src="/Register.mp3"></audio>
+    <audio id="sfx-kick" src="/GETOUT.mp3"></audio>
+    <audio id="sfx-talk"src="/nenene.mp3"></audio>
+    <audio id="sfx-splat" src="/splat.mp3"></audio>
+    <audio id="sfx-scream" src="/scream.mp3"></audio>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.js"
+        }
+    }
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
